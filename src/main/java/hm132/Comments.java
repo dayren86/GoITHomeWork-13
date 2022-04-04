@@ -12,10 +12,29 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class Comments {
-    public void findLastPost(int id) throws IOException, InterruptedException {
+
+    private final String url = "https://jsonplaceholder.typicode.com/users/";
+    private final String urlComments = "https://jsonplaceholder.typicode.com/posts/";
+    private int id;
+    int lastPost;
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setLastPost(int lastPost) {
+        this.lastPost = lastPost;
+    }
+
+    public UserPosts[] fromJsonUser(String string) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.fromJson(string, UserPosts[].class);
+    }
+
+    public void findUserPosts() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest
                 .newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/users/" + id + "/posts/"))
+                .uri(URI.create(url + id + "/posts/"))
                 .GET()
                 .build();
 
@@ -23,27 +42,39 @@ public class Comments {
 
         HttpResponse<String> send = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        UserPosts[] userPosts = gson.fromJson(send.body(), UserPosts[].class);
+        UserPosts[] userPosts = fromJsonUser(send.body());
 
+        setLastPost(userPosts[userPosts.length - 1].id);
+
+    }
+
+    public String findComments() throws IOException, InterruptedException {
         HttpRequest requestComments = HttpRequest
                 .newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/posts/" + userPosts[userPosts.length - 1].id + "/comments"))
+                .uri(URI.create(urlComments + lastPost + "/comments"))
                 .GET()
                 .build();
 
-        HttpResponse<String> sendComments = client.send(requestComments, HttpResponse.BodyHandlers.ofString());
-        System.out.println("sendComments.body() = " + sendComments.body());
+        HttpClient client = HttpClient.newBuilder().build();
 
-        File file = new File("src/main/java/hm132/user-" + id + "-post-" + userPosts[userPosts.length - 1].id + "-comments.json");
+        HttpResponse<String> sendComments = client.send(requestComments, HttpResponse.BodyHandlers.ofString());
+
+        return sendComments.body();
+    }
+
+    public void writeComments(String comment) throws IOException {
+        File file = new File("src/main/java/hm132/user-" + id + "-post-" + lastPost + "-comments.json");
         FileWriter fileWriter = new FileWriter(file);
-        fileWriter.write(sendComments.body());
+        fileWriter.write(comment);
         fileWriter.flush();
 
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Comments comments = new Comments();
-        comments.findLastPost(5);
+
+        comments.setId(5);
+        comments.findUserPosts();
+        comments.writeComments(comments.findComments());
     }
 }

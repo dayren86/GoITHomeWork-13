@@ -11,7 +11,7 @@ import java.net.http.HttpResponse;
 
 public class HM131 {
 
-    private String url = "https://jsonplaceholder.typicode.com/users";
+    private final String url = "https://jsonplaceholder.typicode.com/users/";
 
 
     public String toJsonUser(Users user) {
@@ -20,7 +20,7 @@ public class HM131 {
     }
 
 
-    public void createUser(Users user) throws IOException, InterruptedException {
+    public String createUser(Users user) throws IOException, InterruptedException {
 
         String json = toJsonUser(user);
 
@@ -34,19 +34,17 @@ public class HM131 {
 
         HttpResponse<String> send = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        System.out.println(send);
-        System.out.println(send.body());
+        return send.body();
 
     }
 
-    public void updateUser(Users user, int id) throws IOException, InterruptedException {
+    public String updateUser(Users user, int id) throws IOException, InterruptedException {
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String json = gson.toJson(user);
+        String json = toJsonUser(user);
 
         HttpRequest request = HttpRequest
                 .newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/users/" + id))
+                .uri(URI.create(url + id))
                 .PUT(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
@@ -54,16 +52,15 @@ public class HM131 {
 
         HttpResponse<String> send = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        System.out.println(send);
-        System.out.println(send.body());
+        return send.body();
 
     }
 
-    public void deleteUser(int id) throws IOException, InterruptedException {
+    public int deleteUser(int id) throws IOException, InterruptedException {
 
         HttpRequest request = HttpRequest
                 .newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/users/" + id))
+                .uri(URI.create(url + id))
                 .DELETE()
                 .build();
 
@@ -71,16 +68,15 @@ public class HM131 {
 
         HttpResponse<String> send = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        System.out.println(send);
-        System.out.println(send.body());
+        return send.statusCode();
 
     }
 
-    public void infoAllUser() throws IOException, InterruptedException {
+    public String infoAllUser() throws IOException, InterruptedException {
 
         HttpRequest request = HttpRequest
                 .newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/users"))
+                .uri(URI.create(url))
                 .GET()
                 .build();
 
@@ -88,16 +84,15 @@ public class HM131 {
 
         HttpResponse<String> send = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        System.out.println(send);
-        System.out.println(send.body());
+        return send.body();
 
     }
 
-    public void infoIdUser(int id) throws IOException, InterruptedException {
+    public String infoIdUser(int id) throws IOException, InterruptedException {
 
         HttpRequest request = HttpRequest
                 .newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/users/" + id))
+                .uri(URI.create(url + id))
                 .GET()
                 .build();
 
@@ -105,25 +100,22 @@ public class HM131 {
 
         HttpResponse<String> send = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        System.out.println(send);
-        System.out.println(send.body());
+        return send.body();
 
     }
 
-    public void infoUserName(String userName) throws IOException, InterruptedException {
+    public String infoUserName(String userName) throws IOException, InterruptedException {
 
         HttpRequest request = HttpRequest
                 .newBuilder()
-                .uri(URI.create("https://jsonplaceholder.typicode.com/users?username=" + userName))
+                .uri(URI.create(url + "?username=" + userName))
                 .GET()
                 .build();
 
         HttpClient client = HttpClient.newBuilder().build();
 
         HttpResponse<String> send = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        System.out.println(send);
-        System.out.println(send.body());
+        return send.body();
 
     }
 
@@ -133,12 +125,11 @@ public class HM131 {
 
         HM131 hm131 = new HM131();
 
-        //hm131.createUser(users);
-
-        //hm131.updateUser(users2, 3);
-        //hm131.deleteUser(2);
-        //hm131.infoAllUser();
-        //hm131.infoIdUser(4);
-        hm131.infoUserName("Antonette");
+        //System.out.println(hm131.createUser(users));
+        //System.out.println(hm131.updateUser(users2, 3));
+        //System.out.println("hm131.deleteUser(2) = " + hm131.deleteUser(2));
+        //System.out.println(hm131.infoAllUser());
+        System.out.println(hm131.infoIdUser(4));
+        //System.out.println(hm131.infoUserName("Antonette"));
     }
 }
